@@ -173,7 +173,7 @@ function borrarGasto(id, viajeId){
 }
 
 // =======================
-// INFORME + PDF
+// INFORME + EXPORTAR
 // =======================
 
 function verInforme(viajeId){
@@ -208,7 +208,7 @@ function verInforme(viajeId){
 
     app.innerHTML=`
         <button onclick="abrirViaje(${viajeId})">← Volver</button>
-        <button onclick="exportarPDF()">📄 Exportar PDF</button>
+        <button onclick="exportarInforme()">📄 Exportar Informe</button>
 
         <div id="zonaPDF">
         <h2>Informe ${v.nombre}</h2>
@@ -221,28 +221,39 @@ function verInforme(viajeId){
     `;
 }
 
-function exportarPDF(){
+// =======================
+// EXPORTAR INFORME (FUNCIONA EN APK)
+// =======================
 
-    let elemento = document.getElementById("zonaPDF");
+function exportarInforme(){
 
-    html2pdf()
-        .set({
-            margin:10,
-            filename:"Informe_Viaje.pdf",
-            html2canvas:{scale:2},
-            jsPDF:{unit:"mm",format:"a4",orientation:"portrait"}
-        })
-        .from(elemento)
-        .outputPdf("datauristring")
-        .then(function(pdfDataUri){
+    let contenido = document.getElementById("zonaPDF").innerHTML;
 
-            // Abrir el PDF correctamente en Android
-            let ventana = window.open();
-            ventana.document.write(`
-                <iframe width="100%" height="100%" src="${pdfDataUri}"></iframe>
-            `);
-        });
+    let html = `
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Informe Viaje</title>
+        <style>
+            body{font-family:Arial;padding:20px;}
+            table{border-collapse:collapse;width:100%;}
+            th,td{border:1px solid #000;padding:6px;}
+        </style>
+    </head>
+    <body>
+        ${contenido}
+    </body>
+    </html>`;
+
+    let blob = new Blob([html], {type:"text/html"});
+    let url = URL.createObjectURL(blob);
+
+    let a = document.createElement("a");
+    a.href = url;
+    a.download = "Informe_Viaje.html";
+    a.click();
+
+    URL.revokeObjectURL(url);
 }
 
 pantallaInicio();
-
