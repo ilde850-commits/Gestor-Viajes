@@ -222,6 +222,7 @@ function verInforme(viajeId){
 }
 
 function exportarPDF(){
+
     let elemento = document.getElementById("zonaPDF");
 
     html2pdf()
@@ -232,7 +233,16 @@ function exportarPDF(){
             jsPDF:{unit:"mm",format:"a4",orientation:"portrait"}
         })
         .from(elemento)
-        .save();
+        .outputPdf("datauristring")
+        .then(function(pdfDataUri){
+
+            // Abrir el PDF correctamente en Android
+            let ventana = window.open();
+            ventana.document.write(`
+                <iframe width="100%" height="100%" src="${pdfDataUri}"></iframe>
+            `);
+        });
 }
 
 pantallaInicio();
+
