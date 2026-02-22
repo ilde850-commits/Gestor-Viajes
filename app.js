@@ -249,3 +249,29 @@ function verInforme(viajeId){
 }
 
 pantallaInicio();
+function imprimirInforme(){
+
+    let contenido = document.querySelector("table").outerHTML;
+
+    let html = `
+    <html>
+    <head>
+    <title>Informe</title>
+    <style>
+        body{font-family:Arial;padding:20px;}
+        table{border-collapse:collapse;width:100%;}
+        th,td{border:1px solid #000;padding:6px;text-align:left;}
+    </style>
+    </head>
+    <body>
+        ${contenido}
+    </body>
+    </html>`;
+
+    let win = window.open();
+    win.document.write(html);
+    win.document.close();
+
+    setTimeout(()=>win.print(),500);
+}
+
