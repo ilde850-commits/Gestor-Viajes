@@ -173,7 +173,7 @@ function borrarGasto(id, viajeId){
 }
 
 // =======================
-// INFORME + EXPORTAR
+// INFORME + MODO IMPRIMIR
 // =======================
 
 function verInforme(viajeId){
@@ -208,7 +208,7 @@ function verInforme(viajeId){
 
     app.innerHTML=`
         <button onclick="abrirViaje(${viajeId})">← Volver</button>
-        <button onclick="exportarInforme()">📄 Exportar Informe</button>
+        <button onclick="modoImprimir()">🖨 Ver para Imprimir</button>
 
         <div id="zonaPDF">
         <h2>Informe ${v.nombre}</h2>
@@ -222,38 +222,24 @@ function verInforme(viajeId){
 }
 
 // =======================
-// EXPORTAR INFORME (FUNCIONA EN APK)
+// MODO IMPRIMIR (FUNCIONA EN APK)
 // =======================
 
-function exportarInforme(){
+function modoImprimir(){
 
     let contenido = document.getElementById("zonaPDF").innerHTML;
 
-    let html = `
-    <html>
-    <head>
-        <meta charset="UTF-8">
-        <title>Informe Viaje</title>
-        <style>
-            body{font-family:Arial;padding:20px;}
-            table{border-collapse:collapse;width:100%;}
-            th,td{border:1px solid #000;padding:6px;}
-        </style>
-    </head>
-    <body>
-        ${contenido}
-    </body>
-    </html>`;
+    app.innerHTML = `
+        <button onclick="location.reload()">← Volver</button>
 
-    let blob = new Blob([html], {type:"text/html"});
-    let url = URL.createObjectURL(blob);
+        <div style="padding:20px;font-family:Arial">
+            ${contenido}
+        </div>
 
-    let a = document.createElement("a");
-    a.href = url;
-    a.download = "Informe_Viaje.html";
-    a.click();
-
-    URL.revokeObjectURL(url);
+        <p style="padding:20px;color:gray">
+        Usa el menú del móvil → Compartir → Imprimir o Guardar PDF
+        </p>
+    `;
 }
 
 pantallaInicio();
