@@ -186,7 +186,7 @@ function abrirViaje(id){
 }
 
 // =======================
-// INFORME
+// INFORME (CORREGIDO)
 // =======================
 
 function verInforme(viajeId){
@@ -211,8 +211,19 @@ function verInforme(viajeId){
 
     CONCEPTOS.forEach(c=>{
         let M=resumen[c].M,T=resumen[c].T,total=M+T;
-        filas+=`<tr><td>${c}</td><td>${M.toFixed(2)}</td><td>${T.toFixed(2)}</td><td>${total.toFixed(2)}</td></tr>`;
-        if(c!=="HOTEL" && c!=="SOLRED"){ totalM+=M; totalT+=T; }
+
+        filas+=`<tr>
+            <td>${c}</td>
+            <td>${M.toFixed(2)}</td>
+            <td>${T.toFixed(2)}</td>
+            <td>${total.toFixed(2)}</td>
+        </tr>`;
+
+        // SOLO excluir estos dos
+        if(c!=="SOLRED" && c!=="HOTEL"){
+            totalM+=M;
+            totalT+=T;
+        }
     });
 
     kms.sort((a,b)=>a-b);
