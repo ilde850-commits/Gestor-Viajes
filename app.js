@@ -105,8 +105,6 @@ function guardarNuevoGasto(viajeId, gastoId){
     let importe = parseFloat(document.getElementById("importe").value) || 0;
     let km = parseInt(document.getElementById("km").value) || 0;
 
-    app.innerHTML = "<h3>Guardando gasto...</h3>";
-
     if(gastoId){
         let g = DB.gastos.find(x=>x.id===gastoId);
         g.concepto = concepto;
@@ -126,22 +124,7 @@ function guardarNuevoGasto(viajeId, gastoId){
     }
 
     guardarDB();
-
-    setTimeout(()=>{
-        abrirViaje(viajeId);
-    },100);
-}
-
-// =======================
-// BORRAR GASTO
-// =======================
-
-function borrarGasto(id, viajeId){
-    if(confirm("¿Borrar gasto?")){
-        DB.gastos = DB.gastos.filter(g=>g.id!==id);
-        guardarDB();
-        abrirViaje(viajeId);
-    }
+    abrirViaje(viajeId);
 }
 
 // =======================
@@ -156,8 +139,6 @@ function abrirViaje(id){
     let html=`
         <button onclick="pantallaInicio()">← Volver</button>
         <h2>${v.nombre}</h2>
-
-        KM inicio: ${v.kmInicio}<br><br>
 
         <button onclick="mostrarFormularioGasto(${id})">➕ Gasto</button>
         <button onclick="verInforme(${id})">📊 Informe</button>
@@ -185,8 +166,14 @@ function abrirViaje(id){
     app.innerHTML=html;
 }
 
+function borrarGasto(id, viajeId){
+    DB.gastos = DB.gastos.filter(g=>g.id!==id);
+    guardarDB();
+    abrirViaje(viajeId);
+}
+
 // =======================
-// INFORME (CORREGIDO)
+// INFORME + PDF
 // =======================
 
 function verInforme(viajeId){
@@ -195,16 +182,10 @@ function verInforme(viajeId){
     let lista = DB.gastos.filter(x=>x.viajeId===viajeId);
 
     let resumen={}; CONCEPTOS.forEach(c=>resumen[c]={M:0,T:0});
-    let kms=[];
 
     lista.forEach(g=>{
-        if(resumen[g.concepto]){
-            if(g.pago==="METALICO") resumen[g.concepto].M+=g.importe;
-            else resumen[g.concepto].T+=g.importe;
-        }
-        if((g.concepto==="GAS"||g.concepto==="SOLRED") && g.km){
-            kms.push(g.km);
-        }
+        if(g.pago==="METALICO") resumen[g.concepto].M+=g.importe;
+        else resumen[g.concepto].T+=g.importe;
     });
 
     let filas="",totalM=0,totalT=0;
@@ -219,59 +200,39 @@ function verInforme(viajeId){
             <td>${total.toFixed(2)}</td>
         </tr>`;
 
-        // SOLO excluir estos dos
         if(c!=="SOLRED" && c!=="HOTEL"){
             totalM+=M;
             totalT+=T;
         }
     });
 
-    kms.sort((a,b)=>a-b);
-
-    let listaKm=`<p><b>KM inicio:</b> ${v.kmInicio}</p>`;
-    kms.forEach((k,i)=>listaKm+=`<p>Repostaje ${i+1}: ${k}</p>`);
-
     app.innerHTML=`
         <button onclick="abrirViaje(${viajeId})">← Volver</button>
-        <button onclick="window.print()">🖨 Imprimir</button>
+        <button onclick="exportarPDF()">📄 Exportar PDF</button>
 
-        <h2>INFORME ${v.nombre}</h2>
-
+        <div id="zonaPDF">
+        <h2>Informe ${v.nombre}</h2>
         <table>
         <tr><th>Concepto</th><th>Metálico</th><th>Tarjeta</th><th>Total</th></tr>
         ${filas}
         <tr><th>TOTALES</th><th>${totalM.toFixed(2)}</th><th>${totalT.toFixed(2)}</th><th>${(totalM+totalT).toFixed(2)}</th></tr>
         </table>
-
-        <h3>Kilómetros</h3>
-        ${listaKm}
+        </div>
     `;
 }
 
-pantallaInicio();
-function imprimirInforme(){
+function exportarPDF(){
+    let elemento = document.getElementById("zonaPDF");
 
-    let contenido = document.querySelector("table").outerHTML;
-
-    let html = `
-    <html>
-    <head>
-    <title>Informe</title>
-    <style>
-        body{font-family:Arial;padding:20px;}
-        table{border-collapse:collapse;width:100%;}
-        th,td{border:1px solid #000;padding:6px;text-align:left;}
-    </style>
-    </head>
-    <body>
-        ${contenido}
-    </body>
-    </html>`;
-
-    let win = window.open();
-    win.document.write(html);
-    win.document.close();
-
-    setTimeout(()=>win.print(),500);
+    html2pdf()
+        .set({
+            margin:10,
+            filename:"Informe_Viaje.pdf",
+            html2canvas:{scale:2},
+            jsPDF:{unit:"mm",format:"a4",orientation:"portrait"}
+        })
+        .from(elemento)
+        .save();
 }
 
+pantallaInicio();
