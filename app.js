@@ -85,7 +85,42 @@ function guardarNuevoGasto(viajeId){
 }
 
 // =======================
-// INFORME
+// DETALLE VIAJE
+// =======================
+
+function abrirViaje(id){
+
+    let v = DB.viajes.find(x=>x.id===id);
+    let gastos = DB.gastos.filter(x=>x.viajeId===id);
+
+    let html=`
+        <button onclick="pantallaInicio()">← Volver</button>
+        <h2>${v.nombre}</h2>
+
+        <button onclick="mostrarFormularioGasto(${id})">➕ Gasto</button>
+        <button onclick="verInforme(${id})">📊 Informe</button>
+
+        <table>
+        <tr><th>Fecha</th><th>Concepto</th><th>Pago</th><th>€</th><th>KM</th></tr>
+    `;
+
+    gastos.forEach(g=>{
+        html+=`
+        <tr>
+            <td>${g.fecha}</td>
+            <td>${g.concepto}</td>
+            <td>${g.pago}</td>
+            <td>${g.importe.toFixed(2)}</td>
+            <td>${g.km||""}</td>
+        </tr>`;
+    });
+
+    html+="</table>";
+    app.innerHTML=html;
+}
+
+// =======================
+// INFORME PROFESIONAL
 // =======================
 
 function verInforme(viajeId){
@@ -112,9 +147,9 @@ function verInforme(viajeId){
 
         filas+=`<tr>
             <td>${c}</td>
-            <td>${M.toFixed(2)}</td>
-            <td>${T.toFixed(2)}</td>
-            <td>${total.toFixed(2)}</td>
+            <td>${M.toFixed(2)} €</td>
+            <td>${T.toFixed(2)} €</td>
+            <td><b>${total.toFixed(2)} €</b></td>
         </tr>`;
 
         if(c!=="SOLRED" && c!=="HOTEL"){
@@ -125,22 +160,43 @@ function verInforme(viajeId){
 
     kms.sort((a,b)=>a-b);
 
-    let listaKm=`<p><b>KM inicio:</b> ${v.kmInicio}</p>`;
-    kms.forEach((k,i)=>listaKm+=`<p>Repostaje ${i+1}: ${k}</p>`);
+    let listaKm=`<div class="km-box">
+        <h3>Kilometraje</h3>
+        <p><b>KM inicio:</b> ${v.kmInicio}</p>`;
+
+    kms.forEach((k,i)=>listaKm+=`<p>Repostaje ${i+1}: ${k} km</p>`);
+    listaKm+="</div>";
 
     app.innerHTML=`
         <button onclick="abrirViaje(${viajeId})">← Volver</button>
 
-        <h2>Informe ${v.nombre}</h2>
+        <div class="informe">
 
-        <table>
-        <tr><th>Concepto</th><th>Metálico</th><th>Tarjeta</th><th>Total</th></tr>
-        ${filas}
-        <tr><th>TOTALES</th><th>${totalM.toFixed(2)}</th><th>${totalT.toFixed(2)}</th><th>${(totalM+totalT).toFixed(2)}</th></tr>
-        </table>
+            <div class="cabecera">
+                <h2>INFORME DE VIAJE</h2>
+                <p><b>${v.nombre}</b></p>
+                <p>${v.fechaInicio} → ${v.fechaFin}</p>
+            </div>
 
-        <h3>Kilómetros</h3>
-        ${listaKm}
+            <table class="tabla-informe">
+                <tr>
+                    <th>Concepto</th>
+                    <th>Metálico</th>
+                    <th>Tarjeta</th>
+                    <th>Total</th>
+                </tr>
+                ${filas}
+                <tr class="totales">
+                    <th>TOTALES</th>
+                    <th>${totalM.toFixed(2)} €</th>
+                    <th>${totalT.toFixed(2)} €</th>
+                    <th>${(totalM+totalT).toFixed(2)} €</th>
+                </tr>
+            </table>
+
+            ${listaKm}
+
+        </div>
     `;
 }
 
