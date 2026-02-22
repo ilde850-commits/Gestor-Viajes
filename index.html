@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Gestor de Viajes</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>Gestor de Viajes</h1>
+
+<div id="app"></div>
+
+<script src="app.js"></script>
+<script>
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js");
+}
+</script>
+</body>
+</html>
